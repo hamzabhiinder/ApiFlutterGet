@@ -1,0 +1,81 @@
+final api = "https://delightful-duck-turtleneck.cyclic.app";
+
+  Future<void> getTodoList() async {
+    final response = await http.get(Uri.parse("${api}/todos"));
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body.toString());
+      // print(data.toString());
+
+      TodoData tododata = TodoData.fromJson(data);
+
+      streamController.sink.add(tododata);
+    } else {
+      throw Exception('Error');
+    }
+  }
+
+  Future<Data> postTodo(String text) async {
+    final http.Response respone = await http.post(Uri.parse("${api}/todos"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          "text": text,
+        }));
+    print(respone.statusCode);
+    if (respone.statusCode == 200) {
+      return Data.fromJson(jsonDecode(respone.body.toString()));
+    } else {
+      throw Exception('Error in Posting');
+    }
+  }
+
+  Future<TodoData> DeleteTodoList(id) async {
+    setState(() {
+      isLoading = true;
+    });
+    final response = await http.delete(Uri.parse("${api}/todo/${id}"));
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body.toString());
+      // print(data.toString());
+
+      setState(() {
+        isLoading = false;
+      });
+      return TodoData.fromJson(data);
+    } else {
+      throw Exception('Error');
+    }
+  }
+
+  Future<TodoData> updateData(id, text) async {
+    final response = await http.put(
+      Uri.parse("${api}/todo/${id}"),
+      body: jsonEncode({'text': text}),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body.toString());
+      // print(data.toString());
+
+      return TodoData.fromJson(data);
+    } else {
+      throw Exception('Error');
+    }
+  }
+
+  Future<TodoData> deleteAllData() async {
+    final response = await http.delete(Uri.parse("${api}/todos"));
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body.toString());
+      // print(data.toString());
+
+      return TodoData.fromJson(data);
+    } else {
+      throw Exception('Error');
+    }
+  }
+}
